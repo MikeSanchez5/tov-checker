@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montel.</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-area, .output-area {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .input-area {
+            min-height: 100px;
+        }
+        .output-area {
+            min-height: 100px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #6a0dad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #580b9c;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            border: none;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Montel.</h1>
+    </div>
+    <div class="container">
+        <!-- Input Area -->
+        <div class="input-area">
+            <textarea id="inputText" placeholder="Write your text here..."></textarea>
+        </div>
+
+        <!-- Buttons for Actions -->
+        <div class="buttons">
+            <button id="checkToneButton">Check for tone of voice</button>
+            <button id="creativeButton">Check and get creative</button>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            Loading...
+        </div>
+
+        <!-- Output Area -->
+        <div class="output-area">
+            <p id="outputText">The response from the system will appear here...</p>
+        </div>
+
+        <!-- Buttons for Output Actions -->
+        <div class="buttons">
+            <button id="copyButton">Copy</button>
+            <button id="showChangesButton">Show changes/explanation</button>
+        </div>
+    </div>
+
+    <script>
+        // API Integration
+        const DEEPSEEK_API_KEY = 'your-deepseek-api-key'; // Replace with your API key
+        const API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Replace with the correct API endpoint
+
+        // Tone of Voice System Prompt
+        const toneOfVoicePrompt = `
+        You are a tone-of-voice editor. Your job is to review and edit text to match the following guidelines:
+        1. Use a formal and professional tone.
+        2. Avoid slang and casual language.
+        3. Keep sentences concise and clear.
+        4. Use active voice whenever possible.
+        5. Emphasize our core values: innovation, trust, and customer focus.
+
+        Review the text below and edit it to align with these guidelines. Return the edited text and provide a brief explanation of the changes made.
+        `;
+
+        // Creative System Prompt
+        const creativePrompt = `
+        You are a creative editor. Your job is to review and edit text to make it more engaging, innovative, and aligned with the following guidelines:
+        1. Use a formal and professional tone.
+        2. Avoid slang and casual language.
+        3. Keep sentences concise and clear.
+        4. Use active voice whenever possible.
+        5. Emphasize our core values: innovation, trust, and customer focus.
+        6. Provide creative suggestions to make the text more engaging, such as:
+           - Adding storytelling elements.
+           - Using metaphors or analogies.
+           - Making the text more persuasive or inspiring.
+
+        Review the text below and edit it to align with these guidelines. Return the edited text and provide creative suggestions for improvement.
+        `;
+
+        // DOM Elements
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const checkToneButton = document.getElementById('checkToneButton');
+        const creativeButton = document.getElementById('creativeButton');
+        const copyButton = document.getElementById('copyButton');
+        const showChangesButton = document.getElementById('showChangesButton');
+        const loading = document.getElementById('loading');
+
+        // Function to Call DeepSeek API
+        async function callDeepSeekAPI(prompt, userInput) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat', // Replace with the correct model name
+                    messages: [
+                        { role: 'system', content: prompt },
+                        { role: 'user', content: userInput },
+                    ],
+                }),
+            });
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        // Event Listeners
+        checkToneButton.addEventListener('click', async () => {
+            const userInput = inputText.value;
+            if (!userInput) {
+                alert('Please enter some text to review.');
+                return;
+            }
+
+            loading.style.display = 'block';
+            outputText.innerText = 'Reviewing text...';
+
+            try {
+                const reviewedText = await callDeepSeekAPI(toneOfVoicePrompt, userInput);
+                outputText.innerText = reviewedText;
+            } catch (error) {
+                outputText.innerText = 'An error occurred. Please try again.';
+                console.error(error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        creativeButton.addEventListener('click', async () => {
+            const userInput = inputText.value;
+            if (!userInput) {
+                alert('Please enter some text to review.');
+                return;
+            }
+
+            loading.style.display = 'block';
+            outputText.innerText = 'Generating creative suggestions...';
+
+            try {
+                const reviewedText = await callDeepSeekAPI(creativePrompt, userInput);
+                outputText.innerText = reviewedText;
+            } catch (error) {
+                outputText.innerText = 'An error occurred. Please try again.';
+                console.error(error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(outputText.innerText)
+                .then(() => alert('Text copied to clipboard!'))
+                .catch(() => alert('Failed to copy text.'));
+        });
+
+        showChangesButton.addEventListener('click', () => {
+            alert('This feature will show a detailed explanation of the changes made.');
+        });
+    </script>
+</body>
+</html>
