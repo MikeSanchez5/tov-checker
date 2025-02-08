@@ -81,40 +81,26 @@
         <h1>Montel.</h1>
     </div>
     <div class="container">
-        <!-- Input Area -->
         <div class="input-area">
             <textarea id="inputText" placeholder="Write your text here..."></textarea>
         </div>
-
-        <!-- Buttons for Actions -->
         <div class="buttons">
             <button id="checkToneButton">Check for tone of voice</button>
             <button id="creativeButton">Check and get creative</button>
         </div>
-
-        <!-- Loading State -->
-        <div class="loading" id="loading">
-            Loading...
-        </div>
-
-        <!-- Output Area -->
+        <div class="loading" id="loading">Loading...</div>
         <div class="output-area">
             <p id="outputText">The response from the system will appear here...</p>
         </div>
-
-        <!-- Buttons for Output Actions -->
         <div class="buttons">
             <button id="copyButton">Copy</button>
             <button id="showChangesButton">Show changes/explanation</button>
         </div>
     </div>
-
     <script>
-        // API Integration
-        const DEEPSEEK_API_KEY = 'your-deepseek-api-key'; // Replace with your API key
-        const API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Replace with the correct API endpoint
+        const GEMINI_API_KEY = 'your-gemini-api-key'; // Replace with your Gemini API key
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText';
 
-        // Tone of Voice System Prompt
         const toneOfVoicePrompt = `
         You are a tone-of-voice editor. Your job is to review and edit text to match the following guidelines:
         1. Use a formal and professional tone.
@@ -126,7 +112,6 @@
         Review the text below and edit it to align with these guidelines. Return the edited text and provide a brief explanation of the changes made.
         `;
 
-        // Creative System Prompt
         const creativePrompt = `
         You are a creative editor. Your job is to review and edit text to make it more engaging, innovative, and aligned with the following guidelines:
         1. Use a formal and professional tone.
@@ -142,86 +127,60 @@
         Review the text below and edit it to align with these guidelines. Return the edited text and provide creative suggestions for improvement.
         `;
 
-        // DOM Elements
-        const inputText = document.getElementById('inputText');
-        const outputText = document.getElementById('outputText');
-        const checkToneButton = document.getElementById('checkToneButton');
-        const creativeButton = document.getElementById('creativeButton');
-        const copyButton = document.getElementById('copyButton');
-        const showChangesButton = document.getElementById('showChangesButton');
-        const loading = document.getElementById('loading');
-
-        // Function to Call DeepSeek API
-        async function callDeepSeekAPI(prompt, userInput) {
-            const response = await fetch(API_URL, {
+        async function callGeminiAPI(prompt, userInput) {
+            const response = await fetch(`${API_URL}?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat', // Replace with the correct model name
-                    messages: [
-                        { role: 'system', content: prompt },
-                        { role: 'user', content: userInput },
-                    ],
-                }),
+                    contents: [{ parts: [{ text: `${prompt}\n\nUser input: ${userInput}` }] }]
+                })
             });
             const data = await response.json();
-            return data.choices[0].message.content;
+            return data.candidates?.[0]?.output || 'An error occurred. Please try again.';
         }
 
-        // Event Listeners
-        checkToneButton.addEventListener('click', async () => {
-            const userInput = inputText.value;
+        document.getElementById('checkToneButton').addEventListener('click', async () => {
+            const userInput = document.getElementById('inputText').value;
             if (!userInput) {
                 alert('Please enter some text to review.');
                 return;
             }
 
-            loading.style.display = 'block';
-            outputText.innerText = 'Reviewing text...';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('outputText').innerText = 'Reviewing text...';
 
             try {
-                const reviewedText = await callDeepSeekAPI(toneOfVoicePrompt, userInput);
-                outputText.innerText = reviewedText;
+                const reviewedText = await callGeminiAPI(toneOfVoicePrompt, userInput);
+                document.getElementById('outputText').innerText = reviewedText;
             } catch (error) {
-                outputText.innerText = 'An error occurred. Please try again.';
+                document.getElementById('outputText').innerText = 'An error occurred. Please try again.';
                 console.error(error);
             } finally {
-                loading.style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
             }
         });
 
-        creativeButton.addEventListener('click', async () => {
-            const userInput = inputText.value;
+        document.getElementById('creativeButton').addEventListener('click', async () => {
+            const userInput = document.getElementById('inputText').value;
             if (!userInput) {
                 alert('Please enter some text to review.');
                 return;
             }
 
-            loading.style.display = 'block';
-            outputText.innerText = 'Generating creative suggestions...';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('outputText').innerText = 'Generating creative suggestions...';
 
             try {
-                const reviewedText = await callDeepSeekAPI(creativePrompt, userInput);
-                outputText.innerText = reviewedText;
+                const reviewedText = await callGeminiAPI(creativePrompt, userInput);
+                document.getElementById('outputText').innerText = reviewedText;
             } catch (error) {
-                outputText.innerText = 'An error occurred. Please try again.';
+                document.getElementById('outputText').innerText = 'An error occurred. Please try again.';
                 console.error(error);
             } finally {
-                loading.style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
             }
-        });
-
-        copyButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(outputText.innerText)
-                .then(() => alert('Text copied to clipboard!'))
-                .catch(() => alert('Failed to copy text.'));
-        });
-
-        showChangesButton.addEventListener('click', () => {
-            alert('This feature will show a detailed explanation of the changes made.');
         });
     </script>
 </body>
