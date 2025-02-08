@@ -94,7 +94,6 @@
         </div>
         <div class="buttons">
             <button id="copyButton">Copy</button>
-            <button id="showChangesButton">Show changes/explanation</button>
         </div>
     </div>
     <script>
@@ -193,6 +192,16 @@
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
+        });
+
+        document.getElementById('copyButton').addEventListener('click', () => {
+            const outputText = document.getElementById('outputText').innerText;
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert('Text copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy text. Please try again.');
+            });
         });
     </script>
 </body>
