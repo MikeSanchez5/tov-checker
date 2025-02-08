@@ -43,6 +43,8 @@
         }
         .output-area {
             min-height: 100px;
+            max-height: 300px; /* Set a max height */
+            overflow-y: auto; /* Make it scrollable when content exceeds max height */
         }
         .buttons {
             display: flex;
@@ -50,7 +52,7 @@
             margin-bottom: 20px;
         }
         button {
-            background-color: #6a0dad;
+            background-color: #01796E; /* Changed button color */
             color: white;
             border: none;
             padding: 10px 20px;
@@ -59,7 +61,7 @@
             font-size: 16px;
         }
         button:hover {
-            background-color: #580b9c;
+            background-color: #016056; /* Darker shade for hover effect */
         }
         textarea {
             width: 100%;
@@ -99,10 +101,10 @@
     <script>
         // Note: In a real-world scenario, you should not expose API keys in client-side JavaScript. Use server-side or environment variables.
         const GEMINI_API_KEY = 'AIzaSyAywlx-5XpwhZrBVkn-HN_xwoL6yfPqXFI'; // Replace with your actual key
-        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
         const toneOfVoicePrompt = `
-        You are a tone-of-voice editor. Your job is to review and edit text to match the following guidelines:
+        You are a tone-of-voice editor. Your job is to review and edit text to match the following guidelines, your creativity is limited:
         Conversational:
 * Write as if you are talking to a friend. Use a casual, friendly tone.
 * Avoid formal language or business jargon.
@@ -155,9 +157,11 @@ Examples:
 * Website: "Energy markets explained. Analytics, news, and data products provide everything you need to improve your energy market operations."
 * Social Media: "Join me next Wednesday at Montel’s Austrian Energy Day. I’ll be helping unpack the latest regulation changes and the impact on price volatility."
 * Blog: "Ahead of French Energy Day 2024, French market expert, Clement Bouilloux takes a look at the changing French fuel mix, explaining why the country's unique mix of nuclear and renewable generation is placing downward pressure on power prices."
-`;
+
+        `;
 
         const creativePrompt = `
+        You are a creative editor. Your job is to review and edit text to make it better how you see fit, your creativity is pretty open. YOU MUST follow THESE guidelines:
         Conversational:
 * Write as if you are talking to a friend. Use a casual, friendly tone.
 * Avoid formal language or business jargon.
