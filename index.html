@@ -76,6 +76,19 @@
             text-align: center;
             margin: 10px 0;
         }
+        /* New styles for the copy confirmation */
+        .copy-confirmation {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +109,7 @@
         </div>
         <div class="buttons">
             <button id="copyButton">Copy</button>
+            <span id="copyConfirmation" class="copy-confirmation">Text copied</span>
         </div>
     </div>
     <script>
@@ -115,7 +129,7 @@ Rules:
 * Accents: Use the correct accents for European names and terms where applicable.
 * And/&: Always write "and" unless space is limited (e.g., in tables), it's part of a brand name, or commonly used acronyms like A&E.
 * Contractions: Use contractions to maintain a conversational tone (e.g., it's, you'll).
-* Capitals: Capitalise only the first word in titles unless it's a proper noun or acronym. Job titles are capitalized except for conjunctions.
+* Capitals: Capitalize only the first word in titles unless it's a proper noun or acronym. Job titles are capitalized except for conjunctions.
 * Dashes: Use dashes for emphasis or to break up long sentences, but don't overuse them.
 * Dates: Format as "day month year" without suffixes (e.g., 14 September 2021).
 * Email: Always write as "email", not "e-mail".
@@ -277,7 +291,15 @@ Examples:
         document.getElementById('copyButton').addEventListener('click', () => {
             const outputText = document.getElementById('outputText').innerText;
             navigator.clipboard.writeText(outputText).then(() => {
-                alert('Text copied to clipboard!');
+                const confirmation = document.getElementById('copyConfirmation');
+                confirmation.style.display = 'inline-block';
+                confirmation.style.opacity = '1';
+                setTimeout(() => {
+                    confirmation.style.opacity = '0';
+                    setTimeout(() => {
+                        confirmation.style.display = 'none';
+                    }, 500); // Match the transition duration
+                }, 1500); // Duration for which the message is visible
             }).catch(err => {
                 console.error('Could not copy text: ', err);
                 alert('Failed to copy text. Please try again.');
